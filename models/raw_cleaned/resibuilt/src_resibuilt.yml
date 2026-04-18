@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: resibuilt
+    description: "Resibuilt raw source tables shared into {DBT_ENV_DFF}_RZ.RESIBUILT"
+    database: "{{ env_var('DBT_ENV_DFF') }}_RZ"
+    schema: RESIBUILT
+    tables:
+      - name: PROPERTY
+      - name: RESIDENT
+      - name: WORK_ORDER
+      - name: LEASE
+      - name: INSPECTION
+
+models:
+  - name: rcz_resibuilt_loader
+    description: >
+      Single config-driven loader for the Resibuilt domain. The actual work
+      happens in the pre_hook (resibuilt_load_tables) which creates/refreshes
+      {DBT_ENV_DFF}_RCZ.RESIBUILT.<table> for every enabled table in
+      var('resibuilt_table_config'). The model itself is a tiny anchor view so
+      dbt has a selectable node for run orchestration.
+    config:
+      snf_env_dff: "{{ env_var('DBT_ENV_DFF', 'DEV') }}"
+      resibuilt_batch_id: "{{ var('resibuilt_batch_id') }}"
+      snowflake_warehouse: "{{ env_var('DBT_ENV_SNOWFLAKE_EDIMG_XS_WAREHOUSE') }}"

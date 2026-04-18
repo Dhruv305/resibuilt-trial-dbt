@@ -1,0 +1,30 @@
+# =============================================================================
+# profiles.yml (OPTIONAL — only needed if you want to run dbt locally via CLI)
+# =============================================================================
+# dbt Cloud does NOT read this file. It uses the Snowflake connection you
+# configure on the dbt Cloud job's Environment.
+#
+# To use this locally:
+#   1. Copy this file to  ~/.dbt/profiles.yml     (Mac / Linux)
+#      or to              %USERPROFILE%\.dbt\profiles.yml   (Windows)
+#   2. Set environment variables:
+#        SNOWFLAKE_ACCOUNT   e.g. ab12345.us-east-1
+#        SNOWFLAKE_USER      DBT_CLOUD_USER
+#        SNOWFLAKE_PASSWORD  <the password from 01_setup_snowflake.sql>
+#        DBT_ENV_DFF         DEV
+#   3. Run:  dbt debug --profile resibuilt_trial
+# =============================================================================
+
+resibuilt_trial:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account:   "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user:      "{{ env_var('SNOWFLAKE_USER') }}"
+      password:  "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      role:      DBT_TRIAL_ROLE
+      warehouse: COMPUTE_XS
+      database:  "{{ env_var('DBT_ENV_DFF', 'DEV') }}_RCZ"
+      schema:    RESIBUILT
+      threads: 4

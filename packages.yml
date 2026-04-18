@@ -1,0 +1,3 @@
+# No external dbt packages required for the Resibuilt trial pipeline.
+# All loading and QC is done via local macros in macros/resibuilt/.
+packages: []

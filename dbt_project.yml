@@ -1,0 +1,50 @@
+name: 'resibuilt_trial'
+version: '1.0.0'
+config-version: 2
+
+# dbt Cloud ignores this; it uses the connection defined on the Job's Environment.
+profile: 'resibuilt_trial'
+
+model-paths:    ["models"]
+macro-paths:    ["macros"]
+analysis-paths: ["analyses"]
+seed-paths:     ["seeds"]
+test-paths:     ["tests"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# -----------------------------------------------------------------------------
+# Variables
+# -----------------------------------------------------------------------------
+# resibuilt_batch_id : overridden at runtime via --vars from Airflow /
+#                      dbt Cloud steps_override. Default here only applies
+#                      when a developer runs `dbt run` manually with no vars.
+# resibuilt_tables   : optional list of table names for selective runs. None
+#                      means "all enabled tables" from resibuilt_table_config().
+#
+# The full table config lives in macros/resibuilt/resibuilt_table_config.sql
+# (not here) because dbt's Jinja sandbox can't read arbitrary files on disk,
+# so the YAML is kept inside a macro and parsed via fromyaml().
+# -----------------------------------------------------------------------------
+vars:
+  resibuilt_batch_id: "manual"
+
+# -----------------------------------------------------------------------------
+# Models
+# -----------------------------------------------------------------------------
+models:
+  resibuilt_trial:
+    raw_cleaned:
+      resibuilt:
+        +materialized: view
+        +schema:       RESIBUILT
+        +tags:         ["resibuilt"]
+    audit:
+      resibuilt:
+        +materialized: view
+        +schema:       RESIBUILT
+        +tags:         ["resibuilt", "audit", "monitoring"]
