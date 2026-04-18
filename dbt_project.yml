@@ -41,10 +41,12 @@ models:
     raw_cleaned:
       resibuilt:
         +materialized: view
+        +database:     "{{ env_var('DBT_ENV_DFF', 'DEV') }}_RCZ"
         +schema:       RESIBUILT
         +tags:         ["resibuilt"]
     audit:
       resibuilt:
         +materialized: view
+        +database:     "{{ env_var('DBT_ENV_DFF', 'DEV') }}_AUDIT"
         +schema:       RESIBUILT
         +tags:         ["resibuilt", "audit", "monitoring"]
