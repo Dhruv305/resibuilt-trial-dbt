@@ -86,12 +86,19 @@
             {% endif %}
         {% endfor %}
 
-        {# pipeline metadata — appended to every target table #}
-        {% do col_expressions.append("'RESIBUILT'           AS SOURCE_SYSTEM") %}
-        {% do col_expressions.append("'" ~ tbl_name ~ "'    AS SOURCE_TABLE_NAME") %}
-        {% do col_expressions.append("'" ~ batch_id ~ "'    AS BATCH_ID") %}
-        {% do col_expressions.append("CURRENT_TIMESTAMP()   AS PIPELINE_INSERTED_AT") %}
-        {% do col_expressions.append("CURRENT_DATE()        AS PIPELINE_LOAD_DATE") %}
+        {# pipeline metadata — appended to every target table.
+           IMPORTANT: cast all string-literal columns to VARCHAR explicitly.
+           Without an explicit cast, Snowflake infers the column width from the
+           FIRST literal written by a CTAS (e.g. 'manual' -> VARCHAR(6)), and a
+           later INSERT with a longer value (e.g. a 28-char sched_ batch_id)
+           fails with Snowflake error 100078: "String '…' is too long and would
+           be truncated". Casting to plain VARCHAR makes the column the default
+           max-length VARCHAR(16777216). #}
+        {% do col_expressions.append("CAST('RESIBUILT'        AS VARCHAR) AS SOURCE_SYSTEM") %}
+        {% do col_expressions.append("CAST('" ~ tbl_name  ~ "' AS VARCHAR) AS SOURCE_TABLE_NAME") %}
+        {% do col_expressions.append("CAST('" ~ batch_id ~ "' AS VARCHAR) AS BATCH_ID") %}
+        {% do col_expressions.append("CURRENT_TIMESTAMP()                 AS PIPELINE_INSERTED_AT") %}
+        {% do col_expressions.append("CURRENT_DATE()                      AS PIPELINE_LOAD_DATE") %}
 
         {# ── resolve target-side watermark column name ─────────────────────── #}
         {% set src_watermark = tbl.get('watermark_col') %}
